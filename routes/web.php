@@ -14,29 +14,28 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
+use App\Http\Controllers\DashboardRedirectController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+
 Route::middleware('auth')->group(function () {
 
     // Mengarahkan ke dashboard sesuai role
-    Route::get('/dashboard', function () {
-        return redirect()->route(match (auth()->user()->role) {
-            'admin' => 'admin.dashboard',
-            'staff' => 'staff.dashboard',
-            default => 'user.dashboard',
-        });
-    })->name('dashboard');
+    Route::get('/dashboard', DashboardRedirectController::class)->name('dashboard');
 
     // Area User
     Route::middleware('role:user')->prefix('akun')->name('user.')->group(function () {
-        Route::get('/', fn () => 'Dashboard User (sementara)')->name('dashboard');
+        Route::get('/', UserDashboardController::class)->name('dashboard');
     });
 
     // Area Staff (Admin mewarisi akses Staff)
     Route::middleware('role:admin,staff')->prefix('staff')->name('staff.')->group(function () {
-        Route::get('/', fn () => 'Dashboard Staff (sementara)')->name('dashboard');
+        Route::get('/', StaffDashboardController::class)->name('dashboard');
     });
 
     // Area Admin
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/', fn () => 'Dashboard Admin (sementara)')->name('dashboard');
+        Route::get('/', AdminDashboardController::class)->name('dashboard');
     });
 });

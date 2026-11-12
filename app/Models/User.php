@@ -64,6 +64,16 @@ class User extends Authenticatable
         return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_STAFF], true);
     }
 
+    /** Nama route dashboard sesuai role (dipakai untuk redirect setelah login). */
+    public function dashboardRoute(): string
+    {
+        return match ($this->role) {
+            self::ROLE_ADMIN => 'admin.dashboard',
+            self::ROLE_STAFF => 'staff.dashboard',
+            default          => 'user.dashboard',
+        };
+    }
+
     // ---------------------------------------------------------------
     // Relasi
     // ---------------------------------------------------------------

@@ -25,7 +25,7 @@ class AuthController extends Controller
         // Cegah session fixation: ganti ID sesi setelah login berhasil.
         $request->session()->regenerate();
 
-        return redirect()->intended(route('home'))
+        return redirect()->intended(route($request->user()->dashboardRoute()))
             ->with('success', 'Selamat datang kembali, ' . $request->user()->name . '!');
     }
 
@@ -50,7 +50,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('home')
+        return redirect()->route($user->dashboardRoute())
             ->with('success', 'Akun berhasil dibuat. Selamat datang, ' . $user->name . '!');
     }
 
