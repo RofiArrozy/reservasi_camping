@@ -58,7 +58,7 @@ class Booking extends Model
     protected function casts(): array
     {
         return [
-            // Format 'Y-m-d' agar tersimpan tanpa jam (penting untuk query rentang tanggal di SQLite)
+            // Format 'Y-m-d' hanya memengaruhi tampilan/JSON. Query rentang tanggal memakai whereDate().
             'start_date'     => 'date:Y-m-d',
             'end_date'       => 'date:Y-m-d',
             'total_days'     => 'integer',

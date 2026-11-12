@@ -108,16 +108,16 @@ class Item extends Model
         CarbonInterface|string $end,
         ?int $excludeBookingId = null
     ): int {
-        // Seragamkan ke format Y-m-d agar perbandingan teks di SQLite akurat
-        // (kolom tanggal booking disimpan tanpa jam).
+        // Seragamkan ke format Y-m-d. Perbandingan memakai whereDate() agar
+        // akurat apa pun format penyimpanannya (dengan/tanpa jam) di SQLite.
         $startDate = Carbon::parse($start)->toDateString();
         $endDate   = Carbon::parse($end)->toDateString();
 
         $reserved = $this->bookingItems()
             ->whereHas('booking', function (Builder $query) use ($startDate, $endDate, $excludeBookingId) {
                 $query->whereIn('status', Booking::STOCK_HOLDING_STATUSES)
-                    ->where('start_date', '<=', $endDate)
-                    ->where('end_date', '>=', $startDate);
+                    ->whereDate('start_date', '<=', $endDate)
+                    ->whereDate('end_date', '>=', $startDate);
 
                 if ($excludeBookingId !== null) {
                     $query->where('bookings.id', '!=', $excludeBookingId);
