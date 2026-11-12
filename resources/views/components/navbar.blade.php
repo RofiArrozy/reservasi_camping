@@ -40,6 +40,7 @@
 
             <div class="ml-3 flex items-center gap-2 border-l border-gray-200 pl-3">
                 @auth
+                    <span class="hidden text-sm text-gray-600 lg:inline">Halo, {{ \Illuminate\Support\Str::before(auth()->user()->name, ' ') }}</span>
                     @if (Route::has('dashboard'))
                         <x-button :href="route('dashboard')" variant="secondary">Dashboard</x-button>
                     @endif
@@ -83,6 +84,7 @@
 
         <div class="mt-3 flex flex-col gap-2 border-t border-gray-200 pt-3">
             @auth
+                <p class="px-1 text-sm text-gray-600">Halo, {{ \Illuminate\Support\Str::before(auth()->user()->name, ' ') }}</p>
                 @if (Route::has('dashboard'))
                     <x-button :href="route('dashboard')" variant="secondary" class="w-full">Dashboard</x-button>
                 @endif
