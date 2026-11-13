@@ -46,3 +46,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
     });
 });
+
+use App\Http\Controllers\BlogController;
+
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{article}', [BlogController::class, 'show'])->name('blog.show');
