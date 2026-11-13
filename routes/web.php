@@ -2,7 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'home')->name('home');
+   use App\Http\Controllers\CatalogController;
+   use App\Http\Controllers\HomeController;
+
+   Route::get('/', [HomeController::class, 'index'])->name('home');
+   Route::get('/katalog', [CatalogController::class, 'index'])->name('catalog.index');
+   Route::get('/katalog/alat/{item}', [CatalogController::class, 'showItem'])->name('catalog.items.show');
+   Route::get('/katalog/paket/{package}', [CatalogController::class, 'showPackage'])->name('catalog.packages.show');
+
 use App\Http\Controllers\Auth\AuthController;
 
 Route::middleware('guest')->group(function () {
