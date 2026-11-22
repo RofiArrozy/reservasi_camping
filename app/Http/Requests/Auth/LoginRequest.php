@@ -19,6 +19,18 @@ class LoginRequest extends FormRequest
         return true;
     }
 
+    /**
+     * Normalisasi email ke huruf kecil sebelum validasi. SQLite membedakan
+     * huruf besar/kecil, sehingga tanpa ini "Rofi@x.com" dan "rofi@x.com"
+     * dianggap dua akun berbeda.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'email' => Str::lower(trim((string) $this->input('email'))),
+        ]);
+    }
+
     public function rules(): array
     {
         return [

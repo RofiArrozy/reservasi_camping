@@ -124,14 +124,48 @@ class Booking extends Model
 
     /**
      * Pelacakan booking oleh pengunjung: kode booking + (email ATAU telepon).
+     * Email dibandingkan tanpa membedakan huruf besar/kecil, dan nomor telepon
+     * dicocokkan dalam format 08xx / 628xx / +628xx.
      */
     public function scopeTrack(Builder $query, string $code, string $contact): Builder
     {
+        $contact = trim($contact);
+
         return $query->where('booking_code', strtoupper(trim($code)))
             ->where(function (Builder $q) use ($contact) {
-                $q->where('customer_email', trim($contact))
-                  ->orWhere('customer_phone', trim($contact));
+                $q->whereRaw('LOWER(customer_email) = ?', [mb_strtolower($contact)]);
+
+                if ($phones = self::phoneVariants($contact)) {
+                    $q->orWhereIn('customer_phone', $phones);
+                }
             });
+    }
+
+    /**
+     * Ubah satu nomor telepon menjadi semua variasi format yang mungkin tersimpan.
+     * Contoh: "0812-3456" -> ["08123456", "628123456", "+628123456"].
+     *
+     * @return array<int, string>
+     */
+    public static function phoneVariants(string $input): array
+    {
+        if (str_contains($input, '@')) {
+            return []; // jelas bukan nomor telepon
+        }
+
+        $digits = preg_replace('/\D+/', '', $input);
+
+        if (strlen($digits) < 9) {
+            return [];
+        }
+
+        $local = match (true) {
+            str_starts_with($digits, '62') => substr($digits, 2),
+            str_starts_with($digits, '0')  => substr($digits, 1),
+            default                        => $digits,
+        };
+
+        return ['0' . $local, '62' . $local, '+62' . $local];
     }
 
     // ---------------------------------------------------------------
@@ -139,12 +173,13 @@ class Booking extends Model
     // ---------------------------------------------------------------
 
     /**
-     * Booking boleh diajukan pembatalan jika masih pending/confirmed
-     * dan belum ada pengajuan pembatalan yang menunggu keputusan.
+     * Booking boleh diajukan pembatalan jika masih pending/confirmed, belum melewati
+     * tanggal mulai sewa, dan belum ada pengajuan pembatalan yang menunggu keputusan.
      */
     public function isCancellable(): bool
     {
         return in_array($this->status, [self::STATUS_PENDING, self::STATUS_CONFIRMED], true)
+            && $this->start_date->gte(today())
             && ! $this->cancellationRequests()
                 ->where('status', CancellationRequest::STATUS_PENDING)
                 ->exists();

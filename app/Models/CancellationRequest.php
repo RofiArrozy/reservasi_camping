@@ -72,7 +72,7 @@ class CancellationRequest extends Model
     /**
      * Setujui pembatalan (atomik):
      *  - booking menjadi cancelled  -> stok otomatis terlepas
-     *  - deposit dicatat dikembalikan penuh (pencatatan dummy)
+     *  - deposit dicatat dikembalikan penuh jika sudah dibayar (pencatatan dummy)
      *  - status pembayaran menjadi refunded jika sebelumnya sudah dibayar
      */
     public function approve(User $reviewer, ?string $note = null): void
@@ -82,13 +82,16 @@ class CancellationRequest extends Model
         DB::transaction(function () use ($reviewer, $note) {
             $booking = $this->booking;
 
+            // Deposit hanya dicatat "dikembalikan" jika memang sudah dibayar.
+            $depositPaid = $booking->payment_status === Booking::PAYMENT_PAID;
+
             $this->update([
                 'status'                => self::STATUS_APPROVED,
                 'reviewed_by'           => $reviewer->id,
                 'reviewed_at'           => now(),
                 'staff_note'            => $note,
-                'deposit_refund_amount' => $booking->deposit_amount,
-                'deposit_refund_status' => self::REFUND_REFUNDED,
+                'deposit_refund_amount' => $depositPaid ? $booking->deposit_amount : 0,
+                'deposit_refund_status' => $depositPaid ? self::REFUND_REFUNDED : self::REFUND_NONE,
             ]);
 
             $booking->update([
