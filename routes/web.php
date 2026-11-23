@@ -7,6 +7,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Staff\CancellationController as StaffCancellationController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\User\AnalyticsController as UserAnalyticsController;
@@ -90,6 +91,10 @@ Route::middleware('auth')->group(function () {
     // Area Staff (Admin mewarisi akses Staff)
     Route::middleware('role:admin,staff')->prefix('staff')->name('staff.')->group(function () {
         Route::get('/', StaffDashboardController::class)->name('dashboard');
+
+        Route::get('/pembatalan', [StaffCancellationController::class, 'index'])->name('cancellations.index');
+        Route::post('/pembatalan/{cancellation}/setujui', [StaffCancellationController::class, 'approve'])->name('cancellations.approve');
+        Route::post('/pembatalan/{cancellation}/tolak', [StaffCancellationController::class, 'reject'])->name('cancellations.reject');
     });
 
     // Area Admin

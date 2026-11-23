@@ -74,52 +74,72 @@ class CancellationRequest extends Model
      *  - booking menjadi cancelled  -> stok otomatis terlepas
      *  - deposit dicatat dikembalikan penuh jika sudah dibayar (pencatatan dummy)
      *  - status pembayaran menjadi refunded jika sebelumnya sudah dibayar
+     *
+     * @throws LogicException  Jika pengajuan sudah diproses atau booking sudah berjalan/selesai
      */
     public function approve(User $reviewer, ?string $note = null): void
     {
-        $this->ensurePending();
-
         DB::transaction(function () use ($reviewer, $note) {
             $booking = $this->booking;
+
+            // Periksa status pengajuan terlebih dulu (halaman staf bisa saja sudah kedaluwarsa).
+            if (static::whereKey($this->id)->value('status') !== self::STATUS_PENDING) {
+                throw new LogicException('Pengajuan pembatalan ini sudah diproses.');
+            }
+
+            if (! in_array($booking->status, [Booking::STATUS_PENDING, Booking::STATUS_CONFIRMED], true)) {
+                throw new LogicException('Booking sudah berjalan, selesai, atau dibatalkan sehingga tidak dapat dibatalkan lagi. Silakan tolak pengajuan ini.');
+            }
 
             // Deposit hanya dicatat "dikembalikan" jika memang sudah dibayar.
             $depositPaid = $booking->payment_status === Booking::PAYMENT_PAID;
 
-            $this->update([
-                'status'                => self::STATUS_APPROVED,
-                'reviewed_by'           => $reviewer->id,
-                'reviewed_at'           => now(),
-                'staff_note'            => $note,
-                'deposit_refund_amount' => $depositPaid ? $booking->deposit_amount : 0,
-                'deposit_refund_status' => $depositPaid ? self::REFUND_REFUNDED : self::REFUND_NONE,
-            ]);
+            // Update bersyarat (atomik): hanya berhasil jika pengajuan MASIH pending.
+            // Mencegah dua staf memproses pengajuan yang sama secara bersamaan.
+            $affected = static::whereKey($this->id)
+                ->where('status', self::STATUS_PENDING)
+                ->update([
+                    'status'                => self::STATUS_APPROVED,
+                    'reviewed_by'           => $reviewer->id,
+                    'reviewed_at'           => now(),
+                    'staff_note'            => $note,
+                    'deposit_refund_amount' => $depositPaid ? $booking->deposit_amount : 0,
+                    'deposit_refund_status' => $depositPaid ? self::REFUND_REFUNDED : self::REFUND_NONE,
+                ]);
+
+            if ($affected === 0) {
+                throw new LogicException('Pengajuan pembatalan ini sudah diproses.');
+            }
 
             $booking->update([
                 'status'         => Booking::STATUS_CANCELLED,
-                'payment_status' => $booking->payment_status === Booking::PAYMENT_PAID
-                    ? Booking::PAYMENT_REFUNDED
-                    : $booking->payment_status,
+                'payment_status' => $depositPaid ? Booking::PAYMENT_REFUNDED : $booking->payment_status,
             ]);
         });
+
+        $this->refresh();
     }
 
-    /** Tolak pembatalan; booking tidak berubah. */
+    /**
+     * Tolak pembatalan; booking tidak berubah.
+     *
+     * @throws LogicException  Jika pengajuan sudah diproses
+     */
     public function reject(User $reviewer, ?string $note = null): void
     {
-        $this->ensurePending();
+        $affected = static::whereKey($this->id)
+            ->where('status', self::STATUS_PENDING)
+            ->update([
+                'status'      => self::STATUS_REJECTED,
+                'reviewed_by' => $reviewer->id,
+                'reviewed_at' => now(),
+                'staff_note'  => $note,
+            ]);
 
-        $this->update([
-            'status'      => self::STATUS_REJECTED,
-            'reviewed_by' => $reviewer->id,
-            'reviewed_at' => now(),
-            'staff_note'  => $note,
-        ]);
-    }
-
-    private function ensurePending(): void
-    {
-        if (! $this->isPending()) {
+        if ($affected === 0) {
             throw new LogicException('Pengajuan pembatalan ini sudah diproses.');
         }
+
+        $this->refresh();
     }
 }
