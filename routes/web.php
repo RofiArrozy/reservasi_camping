@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\TrackerController;
+use App\Http\Controllers\User\AnalyticsController as UserAnalyticsController;
 use App\Http\Controllers\User\BookingController as UserBookingController;
 use App\Http\Controllers\User\CancellationController as UserCancellationController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
@@ -82,6 +83,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/profil', [UserProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profil', [UserProfileController::class, 'update'])->name('profile.update');
         Route::put('/profil/password', [UserProfileController::class, 'updatePassword'])->name('profile.password');
+
+        Route::get('/analitik', UserAnalyticsController::class)->name('analytics');
     });
 
     // Area Staff (Admin mewarisi akses Staff)
