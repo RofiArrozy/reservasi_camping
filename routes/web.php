@@ -9,7 +9,9 @@ use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Staff\BookingController as StaffBookingController;
 use App\Http\Controllers\Staff\CancellationController as StaffCancellationController;
+use App\Http\Controllers\Staff\CategoryController as StaffCategoryController;
 use App\Http\Controllers\Staff\IncidentController as StaffIncidentController;
+use App\Http\Controllers\Staff\ItemController as StaffItemController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\User\AnalyticsController as UserAnalyticsController;
@@ -106,6 +108,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/insiden', [StaffIncidentController::class, 'index'])->name('incidents.index');
         Route::post('/insiden/{incident}/status', [StaffIncidentController::class, 'update'])->name('incidents.update');
+
+        // Alat camping & kategori
+        Route::resource('alat', StaffItemController::class)
+            ->parameters(['alat' => 'item'])->names('items')->except('show');
+        Route::resource('kategori', StaffCategoryController::class)
+            ->parameters(['kategori' => 'category'])->names('categories')->only(['index', 'store', 'update', 'destroy']);
     });
 
     // Area Admin
