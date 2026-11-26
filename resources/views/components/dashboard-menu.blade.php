@@ -5,6 +5,7 @@
 
     // Format: [label, nama route, pola route untuk penanda menu aktif]
     $staffMenu = [
+        ['Booking',           'staff.bookings.index',      'staff.bookings.*'],
         ['Pembatalan',        'staff.cancellations.index', 'staff.cancellations.*'],
         ['Alat Camping',      'staff.items.index',         'staff.items.*'],
         ['Paket Sewa',        'staff.packages.index',      'staff.packages.*'],

@@ -7,7 +7,9 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Staff\BookingController as StaffBookingController;
 use App\Http\Controllers\Staff\CancellationController as StaffCancellationController;
+use App\Http\Controllers\Staff\IncidentController as StaffIncidentController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\User\AnalyticsController as UserAnalyticsController;
@@ -95,6 +97,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/pembatalan', [StaffCancellationController::class, 'index'])->name('cancellations.index');
         Route::post('/pembatalan/{cancellation}/setujui', [StaffCancellationController::class, 'approve'])->name('cancellations.approve');
         Route::post('/pembatalan/{cancellation}/tolak', [StaffCancellationController::class, 'reject'])->name('cancellations.reject');
+
+        Route::get('/booking', [StaffBookingController::class, 'index'])->name('bookings.index');
+        Route::get('/booking/{booking}', [StaffBookingController::class, 'show'])->name('bookings.show');
+        Route::post('/booking/{booking}/diambil', [StaffBookingController::class, 'pickup'])->name('bookings.pickup');
+        Route::post('/booking/{booking}/dikembalikan', [StaffBookingController::class, 'returned'])->name('bookings.returned');
+        Route::post('/booking/{booking}/insiden', [StaffIncidentController::class, 'store'])->name('incidents.store');
+
+        Route::get('/insiden', [StaffIncidentController::class, 'index'])->name('incidents.index');
+        Route::post('/insiden/{incident}/status', [StaffIncidentController::class, 'update'])->name('incidents.update');
     });
 
     // Area Admin
