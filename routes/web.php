@@ -11,7 +11,9 @@ use App\Http\Controllers\Staff\BookingController as StaffBookingController;
 use App\Http\Controllers\Staff\CancellationController as StaffCancellationController;
 use App\Http\Controllers\Staff\CategoryController as StaffCategoryController;
 use App\Http\Controllers\Staff\IncidentController as StaffIncidentController;
+use App\Http\Controllers\Staff\ArticleController as StaffArticleController;
 use App\Http\Controllers\Staff\ItemController as StaffItemController;
+use App\Http\Controllers\Staff\PackageController as StaffPackageController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\TrackerController;
 use App\Http\Controllers\User\AnalyticsController as UserAnalyticsController;
@@ -114,6 +116,12 @@ Route::middleware('auth')->group(function () {
             ->parameters(['alat' => 'item'])->names('items')->except('show');
         Route::resource('kategori', StaffCategoryController::class)
             ->parameters(['kategori' => 'category'])->names('categories')->only(['index', 'store', 'update', 'destroy']);
+
+        // Paket sewa & artikel blog
+        Route::resource('paket', StaffPackageController::class)
+            ->parameters(['paket' => 'package'])->names('packages')->except('show');
+        Route::resource('artikel', StaffArticleController::class)
+            ->parameters(['artikel' => 'article'])->names('articles')->except('show');
     });
 
     // Area Admin

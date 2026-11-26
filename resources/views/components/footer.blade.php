@@ -14,8 +14,8 @@
             <h2 class="text-sm font-semibold text-gray-900">Kontak</h2>
             <ul class="mt-3 space-y-2 text-sm text-gray-600">
                 <li>Jl. Contoh No. 1, Surakarta, Jawa Tengah</li>
-                <li>WhatsApp: 0812-0000-0001</li>
-                <li>Email: halo@reservasicamping.test</li>
+                <li>WhatsApp: 0878-8516-1913</li>
+                <li>Email: halo@arrozyrent.test</li>
             </ul>
         </div>
 
