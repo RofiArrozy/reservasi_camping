@@ -110,7 +110,7 @@
             <h2 class="text-2xl font-bold">Masih ada pertanyaan?</h2>
             <p class="mx-auto mt-2 max-w-xl text-emerald-50">Hubungi kami lewat WhatsApp untuk konsultasi kebutuhan alat atau jadwal sewa.</p>
             <div class="mt-6">
-                <x-button href="https://wa.me/6287885161913" target="_blank" rel="noopener" class="bg-white !text-emerald-700 hover:!bg-emerald-50">
+                <x-button href="https://wa.me/6281200000001" target="_blank" rel="noopener" class="bg-white !text-emerald-700 hover:!bg-emerald-50">
                     Chat WhatsApp
                 </x-button>
             </div>

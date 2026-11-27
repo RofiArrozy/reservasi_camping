@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController as AdminActivityLogController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BookingController;
@@ -127,5 +129,10 @@ Route::middleware('auth')->group(function () {
     // Area Admin
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
+
+        // Manajemen akun & log aktivitas
+        Route::resource('akun', AdminUserController::class)
+            ->parameters(['akun' => 'user'])->names('users')->except('show');
+        Route::get('/log-aktivitas', [AdminActivityLogController::class, 'index'])->name('activity-logs.index');
     });
 });
